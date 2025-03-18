@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram Bot Sender</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: radial-gradient(circle at top, #1a1a2e, #0f3460);
+            overflow: hidden;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            text-align: center;
+            width: 350px;
+            margin-bottom: 20px;
+        }
+        h2, h3 {
+            color: #fff;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            outline: none;
+            transition: 0.3s;
+        }
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        input:focus {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(45deg, #ff416c, #ff4b2b);
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.4s;
+            position: relative;
+            overflow: hidden;
+        }
+        button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 300%;
+            height: 300%;
+            background: rgba(255, 255, 255, 0.2);
+            transition: 0.5s;
+            transform: translate(-50%, -50%) scale(0);
+            border-radius: 50%;
+        }
+        button:hover::before {
+            transform: translate(-50%, -50%) scale(1);
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 75, 43, 0.6);
+        }
+        .tutorial {
+            text-align: center;
+            color: white;
+            font-size: 14px;
+            max-width: 400px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Отправка в Telegram</h2>
+        <input type="text" id="token" placeholder="Введите токен бота">
+        <input type="text" id="chat_id" placeholder="Введите Chat ID">
+        <input type="text" id="message" placeholder="Введите сообщение">
+        <button onclick="sendMessage()">🚀 Отправить</button>
+    </div>
+    
+    <div class="tutorial">
+        <h3>Как узнать токен бота?</h3>
+        1️⃣ Открой Telegram и найди бота <b>@BotFather</b>.<br>
+        2️⃣ Напиши <b>/newbot</b> и следуй инструкциям.<br>
+        3️⃣ После создания получишь токен.
+        <br><br>
+        <h3>Как узнать Chat ID?</h3>
+        1️⃣ Напиши @userinfobot в Telegram.<br>
+        2️⃣ Отправь команду <b>/start</b>.<br>
+        3️⃣ Бот покажет твой Chat ID.
+    </div>
+
+    <script>
+        function sendMessage() {
+            let token = document.getElementById("token").value.trim();
+            let chat_id = document.getElementById("chat_id").value.trim();
+            let message = document.getElementById("message").value.trim();
+
+            if (!token || !chat_id || !message) {
+                alert("Заполните все поля!");
+                return;
+            }
+
+            let url = `https://api.telegram.org/bot${token}/sendMessage`;
+            fetch(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ chat_id: chat_id, text: message })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.ok) {
+                    alert("✅ Сообщение отправлено!");
+                } else {
+                    alert("❌ Ошибка: " + data.description);
+                }
+            })
+            .catch(error => alert("Ошибка отправки!"));
+        }
+    </script>
+</body>
+</html>
