@@ -100,6 +100,25 @@
         .github-btn:hover {
             background: #333;
         }
+                .info-box {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 12px;
+            text-align: left;
+            font-size: 14px;
+            margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeIn 1s forwards 0.5s;
+        }
+        .info-box h3 {
+            color: #ff4b2b;
+            margin-bottom: 10px;
+        }
+        .info-box p {
+            margin-bottom: 8px;
+        }
     </style>
 </head>
 <body>
@@ -119,7 +138,20 @@
             <button onclick="clearForm()">🧹 Очистить</button>
         </div>
         <a href="https://github.com/artur458/SendXBot/" class="github-btn">⭐ GitHub проекта</a>
+
+        <div class="info-box">
+            <h3>📌 Как узнать токен бота?</h3>
+            <p>1️⃣ Открой Telegram и найди бота <b>@BotFather</b>.</p>
+            <p>2️⃣ Напиши <b>/newbot</b> и следуй инструкциям.</p>
+            <p>3️⃣ После создания бота, BotFather пришлёт тебе токен.</p>
+
+            <h3>📌 Как узнать Chat ID?</h3>
+            <p>1️⃣ Напиши <b>@userinfobot</b> в Telegram.</p>
+            <p>2️⃣ Отправь команду <b>/start</b>.</p>
+            <p>3️⃣ Бот покажет твой Chat ID.</p>
+        </div>
     </div>
+    
 
     <script>
         function sendMessage() {
