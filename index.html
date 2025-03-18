@@ -35,7 +35,7 @@
             margin-bottom: 15px;
             text-transform: uppercase;
         }
-        input {
+        input, textarea {
             width: 100%;
             padding: 10px;
             margin: 10px 0;
@@ -45,11 +45,12 @@
             color: #fff;
             outline: none;
             transition: 0.3s;
+            resize: none;
         }
-        input::placeholder {
+        input::placeholder, textarea::placeholder {
             color: rgba(255, 255, 255, 0.5);
         }
-        input:focus {
+        input:focus, textarea:focus {
             background: rgba(255, 255, 255, 0.3);
             transform: scale(1.05);
         }
@@ -93,14 +94,31 @@
             font-size: 14px;
             max-width: 400px;
         }
+        .github-link {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px 15px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .github-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
     </style>
 </head>
 <body>
+    <a class="github-link" href="https://github.com/artur458/SendXBot/" target="_blank">GitHub</a>
     <div class="container">
         <h2>Отправка в Telegram от лица бота</h2>
         <input type="text" id="token" placeholder="Введите токен бота">
         <input type="text" id="chat_id" placeholder="Введите Chat ID">
-        <input type="text" id="message" placeholder="Введите сообщение">
+        <textarea id="message" placeholder="Введите сообщение" rows="4"></textarea>
+        <input type="text" id="image_url" placeholder="Введите ссылку на изображение">
         <button onclick="sendMessage()">🚀 Отправить</button>
     </div>
     
@@ -120,18 +138,30 @@
         function sendMessage() {
             let token = document.getElementById("token").value.trim();
             let chat_id = document.getElementById("chat_id").value.trim();
-            let message = document.getElementById("message").value.trim();
-
-            if (!token || !chat_id || !message) {
-                alert("Заполните все поля!");
+            let message = document.getElementById("message").value.trim()
+                .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+                .replace(/\*(.*?)\*/g, '<i>$1</i>')
+                .replace(/~~(.*?)~~/g, '<s>$1</s>')
+                .replace(/\n/g, '%0A');
+            let imageUrl = document.getElementById("image_url").value.trim();
+            
+            if (!token || !chat_id) {
+                alert("Введите токен и Chat ID!");
                 return;
             }
-
+            
             let url = `https://api.telegram.org/bot${token}/sendMessage`;
+            let data = { chat_id: chat_id, text: message, parse_mode: "HTML" };
+            
+            if (imageUrl) {
+                url = `https://api.telegram.org/bot${token}/sendPhoto`;
+                data = { chat_id: chat_id, photo: imageUrl, caption: message, parse_mode: "HTML" };
+            }
+            
             fetch(url, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ chat_id: chat_id, text: message })
+                body: JSON.stringify(data)
             })
             .then(response => response.json())
             .then(data => {
