@@ -69,99 +69,71 @@
             position: relative;
             overflow: hidden;
         }
-        button::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 300%;
-            height: 300%;
+        .file-input {
+            display: none;
+        }
+        .file-label {
+            display: block;
+            padding: 10px;
             background: rgba(255, 255, 255, 0.2);
-            transition: 0.5s;
-            transform: translate(-50%, -50%) scale(0);
-            border-radius: 50%;
-        }
-        button:hover::before {
-            transform: translate(-50%, -50%) scale(1);
-        }
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 75, 43, 0.6);
-        }
-        .tutorial {
-            text-align: center;
             color: white;
-            font-size: 14px;
-            max-width: 400px;
-        }
-        .github-link {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(255, 255, 255, 0.2);
-            padding: 10px 15px;
             border-radius: 8px;
-            text-decoration: none;
-            color: white;
-            font-weight: bold;
+            cursor: pointer;
             transition: 0.3s;
+            text-align: center;
         }
-        .github-link:hover {
+        .file-label:hover {
             background: rgba(255, 255, 255, 0.3);
         }
     </style>
 </head>
 <body>
-    <a class="github-link" href="https://github.com/artur458/SendXBot/" target="_blank">GitHub</a>
     <div class="container">
         <h2>Отправка в Telegram от лица бота</h2>
         <input type="text" id="token" placeholder="Введите токен бота">
         <input type="text" id="chat_id" placeholder="Введите Chat ID">
+        <input type="text" id="reply_id" placeholder="ID сообщения для ответа (необязательно)">
         <textarea id="message" placeholder="Введите сообщение" rows="4"></textarea>
-        <input type="text" id="image_url" placeholder="Введите ссылку на изображение (не обязательно)">
+        
+        <input type="file" id="photo" class="file-input" accept="image/*">
+        <label for="photo" class="file-label">📷 Выберите фото</label>
+        
         <button onclick="sendMessage()">🚀 Отправить</button>
-    </div>
-    
-    <div class="tutorial">
-        <h3>Как узнать токен бота?</h3>
-        1️⃣ Открой Telegram и найди бота <b>@BotFather</b>.<br>
-        2️⃣ Напиши <b>/newbot</b> и следуй инструкциям.<br>
-        3️⃣ После создания получишь токен.
-        <br><br>
-        <h3>Как узнать Chat ID?</h3>
-        1️⃣ Напиши @userinfobot в Telegram.<br>
-        2️⃣ Отправь команду <b>/start</b>.<br>
-        3️⃣ Бот покажет твой Chat ID.
     </div>
 
     <script>
         function sendMessage() {
             let token = document.getElementById("token").value.trim();
             let chat_id = document.getElementById("chat_id").value.trim();
-            let message = document.getElementById("message").value.trim()
-                .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
-                .replace(/\*(.*?)\*/g, '<i>$1</i>')
-                .replace(/~~(.*?)~~/g, '<s>$1</s>')
-                .replace(/\n/g, '%0A');
-            let imageUrl = document.getElementById("image_url").value.trim();
-            
+            let reply_id = document.getElementById("reply_id").value.trim();
+            let message = document.getElementById("message").value.trim();
+            let photoInput = document.getElementById("photo");
+
             if (!token || !chat_id) {
                 alert("Введите токен и Chat ID!");
                 return;
             }
-            
-            let url = `https://api.telegram.org/bot${token}/sendMessage`;
-            let data = { chat_id: chat_id, text: message, parse_mode: "HTML" };
-            
-            if (imageUrl) {
-                url = `https://api.telegram.org/bot${token}/sendPhoto`;
-                data = { chat_id: chat_id, photo: imageUrl, caption: message, parse_mode: "HTML" };
+
+            let formData = new FormData();
+            formData.append("chat_id", chat_id);
+            if (reply_id) {
+                formData.append("reply_to_message_id", reply_id);
             }
-            
+
+            if (photoInput.files.length > 0) {
+                let photo = photoInput.files[0];
+                formData.append("photo", photo);
+                formData.append("caption", message);
+                var url = `https://api.telegram.org/bot${token}/sendPhoto`;
+            } else {
+                formData.append("text", message);
+                formData.append("parse_mode", "HTML");
+                var url = `https://api.telegram.org/bot${token}/sendMessage`;
+            }
+
             fetch(url, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(data)
+                body: formData
             })
             .then(response => response.json())
             .then(data => {
