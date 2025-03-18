@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TeleSendBot - Отправка сообщений от лица бота</title>
+    <title>TeleSendBot - Отправка в Telegram от лица бота</title>
     <style>
         * {
             margin: 0;
@@ -18,6 +18,7 @@
             align-items: center;
             height: 100vh;
             background: radial-gradient(circle at top, #1a1a2e, #0f3460);
+            color: #fff;
         }
         .container {
             background: rgba(255, 255, 255, 0.1);
@@ -42,7 +43,6 @@
             background: rgba(255, 255, 255, 0.2);
             color: #fff;
             outline: none;
-            resize: none;
             transition: 0.3s;
         }
         input::placeholder, textarea::placeholder {
@@ -69,38 +69,23 @@
             cursor: pointer;
             transition: 0.4s;
         }
-        .file-input {
-            display: none;
-        }
-        .file-label {
-            display: block;
-            padding: 10px;
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: 0.3s;
-            text-align: center;
-        }
-        .file-label:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
         .github-btn {
-            margin-top: 15px;
-            padding: 10px;
-            background: #24292e;
-            color: white;
-            text-align: center;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: bold;
+            margin-top: 20px;
             display: block;
+            text-align: center;
+            background: #333;
+            padding: 10px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #fff;
+            font-size: 14px;
+            font-weight: bold;
             transition: 0.3s;
         }
         .github-btn:hover {
-            background: #333;
+            background: #444;
         }
-                .info-box {
+        .info-box {
             background: rgba(0, 0, 0, 0.2);
             padding: 15px;
             border-radius: 12px;
@@ -108,9 +93,6 @@
             font-size: 14px;
             margin-top: 20px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            opacity: 0;
-            transform: translateY(20px);
-            animation: fadeIn 1s forwards 0.5s;
         }
         .info-box h3 {
             color: #ff4b2b;
@@ -123,43 +105,40 @@
 </head>
 <body>
     <div class="container">
-        <h2>Отправка в Telegram от лица бота</h2>
+        <h2>Отправка в Telegram</h2>
         <input type="text" id="token" placeholder="Введите токен бота">
         <input type="text" id="chat_id" placeholder="Введите Chat ID">
         <input type="text" id="reply_id" placeholder="ID сообщения для ответа (необязательно)">
         <textarea id="message" placeholder="Введите сообщение" rows="4"></textarea>
-
-        <input type="file" id="photo" class="file-input" accept="image/*" onchange="handleFile()">
-        <label for="photo" class="file-label" id="photoLabel">📷 Выберите фото</label>
-        <button id="removePhoto" style="display: none;" onclick="removePhoto()">❌ Удалить фото</button>
+        <input type="file" id="photo" accept="image/*">
 
         <div class="buttons">
-            <button onclick="sendMessage()">🚀 Отправить</button>
+            <button onclick="sendMessageOrPhoto()">📩 Отправить</button>
             <button onclick="clearForm()">🧹 Очистить</button>
         </div>
-        <a href="https://github.com/artur458/SendXBot/" class="github-btn">⭐ GitHub проекта</a>
+
+        <a href="https://github.com/твоя-ссылка" class="github-btn">⭐ GitHub</a>
 
         <div class="info-box">
             <h3>📌 Как узнать токен бота?</h3>
-            <p>1️⃣ Открой Telegram и найди бота <b>@BotFather</b>.</p>
+            <p>1️⃣ Открой Telegram и найди бота <a href="https://t.me/BotFather"><b>@BotFather</b></a>.</p>
             <p>2️⃣ Напиши <b>/newbot</b> и следуй инструкциям.</p>
             <p>3️⃣ После создания бота, BotFather пришлёт тебе токен.</p>
 
             <h3>📌 Как узнать Chat ID?</h3>
-            <p>1️⃣ Напиши <b>@userinfobot</b> в Telegram.</p>
+            <p>1️⃣ Напиши <a href="https://t.me/userinfobot"><b>@userinfobot</b></a> в Telegram.</p>
             <p>2️⃣ Отправь команду <b>/start</b>.</p>
             <p>3️⃣ Бот покажет твой Chat ID.</p>
         </div>
     </div>
-    
 
     <script>
-        function sendMessage() {
+        function sendMessageOrPhoto() {
             let token = document.getElementById("token").value.trim();
             let chat_id = document.getElementById("chat_id").value.trim();
             let reply_id = document.getElementById("reply_id").value.trim();
             let message = document.getElementById("message").value.trim();
-            let photoInput = document.getElementById("photo");
+            let photoInput = document.getElementById("photo").files[0];
 
             if (!token || !chat_id) {
                 alert("Введите токен и Chat ID!");
@@ -172,16 +151,15 @@
                 formData.append("reply_to_message_id", reply_id);
             }
 
-            let url;
-            if (photoInput.files.length > 0) {
-                let photo = photoInput.files[0];
-                formData.append("photo", photo);
-                formData.append("caption", message);
-                url = `https://api.telegram.org/bot${token}/sendPhoto`;
+            let url = `https://api.telegram.org/bot${token}/`;
+            
+            if (photoInput) {
+                formData.append("photo", photoInput);
+                url += "sendPhoto";
             } else {
                 formData.append("text", message);
                 formData.append("parse_mode", "HTML");
-                url = `https://api.telegram.org/bot${token}/sendMessage`;
+                url += "sendMessage";
             }
 
             fetch(url, {
@@ -191,7 +169,7 @@
             .then(response => response.json())
             .then(data => {
                 if (data.ok) {
-                    alert("✅ Сообщение отправлено!");
+                    alert(photoInput ? "✅ Фото отправлено!" : "✅ Сообщение отправлено!");
                 } else {
                     alert("❌ Ошибка: " + data.description);
                 }
@@ -199,36 +177,12 @@
             .catch(error => alert("Ошибка отправки!"));
         }
 
-        function handleFile() {
-            let photoInput = document.getElementById("photo");
-            let photoLabel = document.getElementById("photoLabel");
-            let removeBtn = document.getElementById("removePhoto");
-
-            if (photoInput.files.length > 0) {
-                photoLabel.innerText = "📷 Фото выбрано";
-                removeBtn.style.display = "block";
-            } else {
-                photoLabel.innerText = "📷 Выберите фото";
-                removeBtn.style.display = "none";
-            }
-        }
-
-        function removePhoto() {
-            let photoInput = document.getElementById("photo");
-            let photoLabel = document.getElementById("photoLabel");
-            let removeBtn = document.getElementById("removePhoto");
-
-            photoInput.value = "";
-            photoLabel.innerText = "📷 Выберите фото";
-            removeBtn.style.display = "none";
-        }
-
         function clearForm() {
             document.getElementById("token").value = "";
             document.getElementById("chat_id").value = "";
             document.getElementById("reply_id").value = "";
             document.getElementById("message").value = "";
-            removePhoto();
+            document.getElementById("photo").value = "";
         }
     </script>
 </body>
